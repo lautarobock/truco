@@ -6,14 +6,50 @@ export type MatchStatus = "playing" | "finished" | "cancelled"
 
 export type TeamIndex = 0 | 1
 
+export type HandKind = "redonda" | "pica"
+
 export type Player = {
   id: string
   name: string
 }
 
 export type SideView = {
+  ids: string[]
   names: string[]
   score: number
+}
+
+export type SeatView = {
+  id: string
+  name: string
+}
+
+export type PicaDuelView = {
+  round: number
+  step: number
+  playerIds: [string, string]
+  winnerId: string
+  points: number
+}
+
+export type TableState = {
+  scores: [number, number]
+  dealerSeat: number
+  round: number
+  hand: HandKind
+  picaStep: number
+  picaPica: PicaDuelView[]
+}
+
+export type TableResult = {
+  state: TableState | null
+  error: string | null
+}
+
+export type HeadToHeadRow = {
+  players: [SeatView, SeatView]
+  matchWins: [number, number]
+  picaWins: [number, number]
 }
 
 export type MatchView = {
@@ -21,6 +57,12 @@ export type MatchView = {
   status: MatchStatus
   modality: Modality
   teams: [SideView, SideView]
+  seats: SeatView[]
+  dealerSeat: number
+  round: number
+  hand: HandKind
+  picaStep: number
+  picaPica: PicaDuelView[]
   benchNames: string[]
   winnerTeam: TeamIndex | null
   finishedAt: string | null
@@ -31,6 +73,7 @@ export type HistoryMatch = {
   finishedAt: string
   teams: [SideView, SideView]
   winnerTeam: TeamIndex
+  picaPoints: number
 }
 
 export type LiveMatch = {

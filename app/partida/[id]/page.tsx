@@ -51,6 +51,13 @@ async function Partida({ params }: { params: Promise<{ id: string }> }) {
         matchId={match.id}
         teams={match.teams}
         benchNames={match.benchNames}
+        seats={match.seats}
+        dealerSeat={match.dealerSeat}
+        round={match.round}
+        hand={match.hand}
+        picaStep={match.picaStep}
+        picaPica={match.picaPica}
+        modality={match.modality}
       />
     )
   }
@@ -85,7 +92,7 @@ function Cerrada({ match }: { match: MatchView }) {
       ) : null}
       <div className="grid grid-cols-2 gap-3">
         {match.teams.map((team) => (
-          <section key={team.names.join("-")} className="rounded-2xl bg-black/15 p-3">
+          <section key={team.ids.join("-")} className="rounded-2xl bg-black/15 p-3">
             <p className="text-sm leading-tight">{joinNames(team.names)}</p>
             <p className="mt-2 font-display text-4xl font-semibold tabular-nums">
               {team.score}
@@ -94,6 +101,48 @@ function Cerrada({ match }: { match: MatchView }) {
           </section>
         ))}
       </div>
+      {match.seats.length > 0 ? (
+        <section className="rounded-2xl bg-black/15 px-4 py-3">
+          <h2 className="text-sm tracking-wide text-cream/70 uppercase">Mesa</h2>
+          <p className="mt-1 leading-relaxed">{joinNames(match.seats.map((seat) => seat.name))}</p>
+          <p className="mt-1 text-sm text-cream/70">En ese orden alrededor de la mesa.</p>
+        </section>
+      ) : null}
+      {match.picaPica.length > 0 ? (
+        <section className="rounded-2xl bg-black/15 px-4 py-3">
+          <h2 className="text-sm tracking-wide text-cream/70 uppercase">Pica pica</h2>
+          <ul className="mt-2 grid gap-2">
+            {match.seats.length >= 6
+              ? [0, 1, 2].map((index) => {
+                  const left = match.seats[index]
+                  const right = match.seats[index + 3]
+                  if (!left || !right) return null
+                  let leftPoints = 0
+                  let rightPoints = 0
+                  for (const duel of match.picaPica) {
+                    const [first, second] = duel.playerIds
+                    const same =
+                      (first === left.id && second === right.id) ||
+                      (first === right.id && second === left.id)
+                    if (!same) continue
+                    if (duel.winnerId === left.id) leftPoints += duel.points
+                    else if (duel.winnerId === right.id) rightPoints += duel.points
+                  }
+                  if (leftPoints === 0 && rightPoints === 0) return null
+                  return (
+                    <li key={left.id} className="flex items-baseline justify-between gap-3 text-sm">
+                      <span>{left.name}</span>
+                      <span className="font-display text-xl font-semibold tabular-nums">
+                        {leftPoints}–{rightPoints}
+                      </span>
+                      <span>{right.name}</span>
+                    </li>
+                  )
+                })
+              : null}
+          </ul>
+        </section>
+      ) : null}
       <Link href="/historial" className={buttonPrimary}>
         Ver historial
       </Link>

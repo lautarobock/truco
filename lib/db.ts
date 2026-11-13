@@ -1,5 +1,13 @@
 import { MongoClient, type Db, type ObjectId } from "mongodb"
-import type { MatchStatus, Modality, TeamIndex } from "@/lib/types"
+import type { HandKind, MatchStatus, Modality, TeamIndex } from "@/lib/types"
+
+export type PicaDuelDoc = {
+  round: number
+  step?: number
+  playerIds: [ObjectId, ObjectId]
+  winnerId: ObjectId
+  points: number
+}
 
 export type PlayerDoc = {
   _id: ObjectId
@@ -17,6 +25,12 @@ export type MatchDoc = {
     { playerIds: ObjectId[]; score: number },
   ]
   bench: ObjectId[]
+  seats?: ObjectId[]
+  dealerSeat?: number
+  round?: number
+  hand?: HandKind
+  picaStep?: number
+  picaPica?: PicaDuelDoc[]
   winnerTeam: TeamIndex | null
   createdAt: Date
   finishedAt: Date | null

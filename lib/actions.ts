@@ -7,16 +7,28 @@ import {
   createMatchRecord,
   createPlayer,
   finishMatchRecord,
+  passHandRecord,
+  scorePicaPoint,
+  advancePicaStep,
   updateMatchScore,
   type CreateMatchInput,
 } from "@/lib/data"
 import { mongoConfigured } from "@/lib/db"
-import { isTeamIndex, type PlayerFormState, type ScoreResult } from "@/lib/types"
+import {
+  isTeamIndex,
+  type PlayerFormState,
+  type ScoreResult,
+  type TableResult,
+} from "@/lib/types"
 
 function missingDb(): { error: string } {
   return {
     error: "Falta configurar MongoDB. Agregá MONGODB_URI y MONGODB_DB en .env.local.",
   }
+}
+
+function missingTable(): TableResult {
+  return { state: null, error: missingDb().error }
 }
 
 export async function addPlayer(
@@ -93,9 +105,57 @@ export async function closeMatch(matchId: string): Promise<{ error: string } | v
 
   revalidatePath("/")
   revalidatePath("/historial")
+  revalidatePath("/historial/mano-a-mano")
   revalidatePath("/tabla")
   revalidatePath(`/partida/${matchId}`)
   redirect(`/partida/${matchId}`)
+}
+
+export async function passHand(matchId: string): Promise<TableResult> {
+  if (!mongoConfigured()) return missingTable()
+
+  try {
+    const result = await passHandRecord(matchId)
+    revalidatePath(`/partida/${matchId}`)
+    return result
+  } catch (error) {
+    console.error(error)
+    return { state: null, error: "No se pudo pasar la mano." }
+  }
+}
+
+export async function scorePica(
+  matchId: string,
+  playerId: string,
+  delta: 1 | -1,
+): Promise<TableResult> {
+  if (!mongoConfigured()) return missingTable()
+
+  try {
+    const result = await scorePicaPoint(matchId, playerId, delta)
+    revalidatePath(`/partida/${matchId}`)
+    revalidatePath("/")
+    return result
+  } catch (error) {
+    console.error(error)
+    return { state: null, error: "No se pudo anotar el punto." }
+  }
+}
+
+export async function movePica(
+  matchId: string,
+  direction: 1 | -1,
+): Promise<TableResult> {
+  if (!mongoConfigured()) return missingTable()
+
+  try {
+    const result = await advancePicaStep(matchId, direction)
+    revalidatePath(`/partida/${matchId}`)
+    return result
+  } catch (error) {
+    console.error(error)
+    return { state: null, error: "No se pudo cambiar de mano." }
+  }
 }
 
 export async function voidMatch(matchId: string): Promise<{ error: string } | void> {

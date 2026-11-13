@@ -3,6 +3,7 @@ import { connection } from "next/server"
 import { Suspense } from "react"
 import { FaltaMongo, MongoCaido } from "@/components/FaltaMongo"
 import { Screen } from "@/components/Screen"
+import { buttonSecondary } from "@/components/ui"
 import { listHistory } from "@/lib/data"
 import { mongoConfigured } from "@/lib/db"
 import { readResult } from "@/lib/guard"
@@ -14,6 +15,9 @@ export const metadata = { title: "Historial" }
 export default function HistorialPage() {
   return (
     <Screen title="Historial">
+      <Link href="/historial/mano-a-mano" className={buttonSecondary}>
+        Mano a mano
+      </Link>
       <Suspense fallback={<p className="text-cream/80">Cargando partidos…</p>}>
         <Historial />
       </Suspense>
@@ -62,6 +66,9 @@ async function Historial() {
               </div>
               <p className="mt-2 text-sm text-cream/70">
                 {phaseText(match.teams[0].score)} · {phaseText(match.teams[1].score)}
+                {match.picaPoints > 0
+                  ? ` · pica pica ${match.picaPoints} ${match.picaPoints === 1 ? "punto" : "puntos"}`
+                  : ""}
               </p>
             </Link>
           </li>
